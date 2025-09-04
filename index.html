@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Calculator + Money Converter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem;
+    margin: 0;
+  }
+
+  /* Separated Heading */
+  .main-heading {
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    color: #5a9bd5;
+    font-weight: 700;
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+    animation: fadeInDown 0.8s ease forwards;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.1);
+    width: 380px;
+    max-width: 100%;
+    overflow: hidden;
+    animation: fadeInScale 0.8s ease forwards;
+  }
+
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .tab-buttons {
+    display: flex;
+  }
+
+  .tab-buttons button {
+    flex: 1;
+    background: #e0e7ff;
+    border: none;
+    padding: 1rem 0;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+  }
+
+  .tab-buttons button.active {
+    background: #5a9bd5;
+    color: white;
+    font-weight: 700;
+  }
+
+  main {
+    padding: 1.5rem 2rem 2rem;
+  }
+
+  /* Calculator Styles */
+  .calculator {
+    display: none;
+    flex-direction: column;
+  }
+
+  .calculator.active {
+    display: flex;
+  }
+
+  .display {
+    background: #f0f4ff;
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    text-align: right;
+    margin-bottom: 1rem;
+    min-height: 3.5rem;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
+  }
+
+  .buttons-grid button {
+    padding: 1.1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    background: #f0f4ff;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(90,155,213,0.3);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    user-select: none;
+  }
+
+  .buttons-grid button.operator {
+    background: #5a9bd5;
+    color: white;
+    box-shadow: 0 6px 15px rgba(90,155,213,0.7);
+  }
+
+  .buttons-grid button.zero {
+    grid-column: span 2;
+  }
+
+  .buttons-grid button:active {
+    transform: scale(0.95);
+  }
+
+  /* Money Converter Styles */
+  .converter {
+    display: none;
+    flex-direction: column;
+  }
+
+  .converter.active {
+    display: flex;
+  }
+
+  .converter label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #333;
+  }
+
+  .converter input, .converter select {
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    border: 1.5px solid #ccc;
+    transition: border-color 0.3s ease;
+  }
+
+  .converter input:focus, .converter select:focus {
+    border-color: #5a9bd5;
+    outline: none;
+  }
+
+  .convert-btn {
+    background: #5a9bd5;
+    color: white;
+    border: none;
+    padding: 0.9rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(90,155,213,0.7);
+    transition: background-color 0.3s ease;
+  }
+
+  .convert-btn:hover {
+    background: #3f83c0;
+  }
+
+  .result {
+    margin-top: 1.2rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #333;
+    min-height: 2rem;
+    text-align: center;
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
+    .container {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <h1 class="main-heading">Calculator & Money Converter</h1>
+
+  <div class="container">
+    <div class="tab-buttons">
+      <button id="calc-tab" class="active">Calculator</button>
+      <button id="conv-tab">Money Converter</button>
+    </div>
+    <main>
+      <!-- Calculator -->
+      <section class="calculator active" id="calculator">
+        <div class="display" id="calc-display">0</div>
+        <div class="buttons-grid">
+          <button class="operator" data-value="C">C</button>
+          <button class="operator" data-value="←">←</button>
+          <button class="operator" data-value="/">÷</button>
+          <button class="operator" data-value="*">×</button>
+
+          <button data-value="7">7</button>
+          <button data-value="8">8</button>
+          <button data-value="9">9</button>
+          <button class="operator" data-value="-">−</button>
+
+          <button data-value="4">4</button>
+          <button data-value="5">5</button>
+          <button data-value="6">6</button>
+          <button class="operator" data-value="+">+</button>
+
+          <button data-value="1">1</button>
+          <button data-value="2">2</button>
+          <button data-value="3">3</button>
+          <button class="operator" data-value="=">=</button>
+
+          <button class="zero" data-value="0">0</button>
+          <button data-value=".">.</button>
+        </div>
+      </section>
+
+      <!-- Money Converter -->
+      <section class="converter" id="converter">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" placeholder="Enter amount" min="0" step="any" />
+
+        <label for="from-currency">From:</label>
+        <select id="from-currency">
+          <option value="USD" selected>USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+        </select>
+
+        <label for="to-currency">To:</label>
+        <select id="to-currency">
+          <option value="EUR">EUR - Euro</option>
+          <option value="USD" selected>USD - US Dollar</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="JPY">JPY - Japanese Yen</option>
+        </select>
+
+        <button class="convert-btn" id="convert-btn">Convert</button>
+        <div class="result" id="conversion-result"></div>
+      </section>
+    </main>
+  </div>
+
+<script>
+  // Tab switching
+  const calcTab = document.getElementById('calc-tab');
+  const convTab = document.getElementById('conv-tab');
+  const calculator = document.getElementById('calculator');
+  const converter = document.getElementById('converter');
+
+  calcTab.addEventListener('click', () => {
+    calcTab.classList.add('active');
+    convTab.classList.remove('active');
+    calculator.classList.add('active');
+    converter.classList.remove('active');
+  });
+
+  convTab.addEventListener('click', () => {
+    convTab.classList.add('active');
+    calcTab.classList.remove('active');
+    converter.classList.add('active');
+    calculator.classList.remove('active');
+  });
+
+  // Calculator logic
+  const display = document.getElementById('calc-display');
+  let currentInput = '';
+  let resetNext = false;
+
+  function updateDisplay() {
+    display.textContent = currentInput || '0';
+  }
+
+  function calculateExpression(expr) {
+    try {
+      expr = expr.replace(/÷/g, '/').replace(/×/g, '*');
+      // eslint-disable-next-line no-eval
+      let result = eval(expr);
+      if (result === Infinity || result === -Infinity) return 'Error';
+      if (isNaN(result)) return 'Error';
+      return Math.round((result + Number.EPSILON) * 1e12) / 1e12;
+    } catch {
+      return 'Error';
+    }
+  }
+
+  document.querySelectorAll('.calculator .buttons-grid button').forEach(button => {
+    button.addEventListener('click', () => {
+      const val = button.getAttribute('data-value');
+
+      if (val === 'C') {
+        currentInput = '';
+        resetNext = false;
+      } else if (val === '←') {
+        if (!resetNext) currentInput = currentInput.slice(0, -1);
+      } else if (val === '=') {
+        if (currentInput.trim() === '') return;
+        const res = calculateExpression(currentInput);
+        currentInput = res.toString();
+        resetNext = true;
+      } else {
+        if (resetNext) {
+          if (['+', '-', '*', '/'].includes(val)) {
+            resetNext = false;
+            currentInput += val;
+          } else {
+            currentInput = val;
+            resetNext = false;
+          }
+        } else {
+          currentInput += val;
+        }
+      }
+      updateDisplay();
+    });
+  });
+
+  updateDisplay();
+
+  // Money Converter Logic
+  // Demo fixed rates relative to USD
+  const rates = {
+    USD: 1,
+    EUR: 0.92,
+    GBP: 0.81,
+    JPY: 142.3
+  };
+
+  const amountInput = document.getElementById('amount');
+  const fromSelect = document.getElementById('from-currency');
+  const toSelect = document.getElementById('to-currency');
+  const convertBtn = document.getElementById('convert-btn');
+  const resultDiv = document.getElementById('conversion-result');
+
+  convertBtn.addEventListener('click', () => {
+    const amount = parseFloat(amountInput.value);
+    if (isNaN(amount) || amount < 0) {
+      resultDiv.textContent = 'Please enter a valid positive amount.';
+      resultDiv.style.color = 'red';
+      return;
+    }
+    const from = fromSelect.value;
+    const to = toSelect.value;
+
+    if (from === to) {
+      resultDiv.textContent = `Same currency selected. Amount: ${amount.toFixed(2)} ${to}`;
+      resultDiv.style.color = '#333';
+      return;
+    }
+
+    const amountInUSD = amount / rates[from];
+    const convertedAmount = amountInUSD * rates[to];
+
+    resultDiv.textContent = `${amount.toFixed(2)} ${from} = ${convertedAmount.toFixed(2)} ${to}`;
+    resultDiv.style.color = '#333';
+  });
+</script>
+</body>
+</html>
