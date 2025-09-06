@@ -1,0 +1,3 @@
+About the program was simple calculator and money converter .
+It was use for calculating the sums and converting money dollors to euros and other currency.
+it was very easy to use with some animation
